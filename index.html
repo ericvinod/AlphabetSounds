@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Letter Sounds Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --chalkboard:#1E3A2B;
+    --chalkboard-dark:#122019;
+    --chalkboard-light:#274B37;
+    --chalk:#F6F1E4;
+    --chalk-dim:#CFE8D8;
+    --sun:#FFC94D;
+    --sun-dark:#E8A93A;
+    --coral:#FF6F59;
+    --coral-dark:#E3543F;
+    --sky:#4ECDC4;
+    --sky-dark:#31A79E;
+    --violet:#A78BFA;
+    --wood:#8B5E3C;
+    --wood-dark:#6B4529;
+    --paper:#FBF7EE;
+    --ink:#20291F;
+    --radius-tile: 14px;
+    --shadow-chalk: 0 10px 30px rgba(0,0,0,0.35);
+    font-size: 16px;
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{
+    margin:0;
+    padding:0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Quicksand', system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x:hidden;
+  }
+
+  body{
+    background-image:
+      radial-gradient(circle at 8% 12%, rgba(255,201,77,0.16) 0, transparent 40%),
+      radial-gradient(circle at 92% 8%, rgba(78,205,196,0.16) 0, transparent 42%),
+      radial-gradient(circle at 50% 100%, rgba(167,139,250,0.10) 0, transparent 50%);
+    min-height:100vh;
+  }
+
+  h1,h2,h3,.display{
+    font-family: 'Baloo 2', system-ui, sans-serif;
+    margin:0;
+    letter-spacing: 0.2px;
+  }
+
+  /* ---------- layout shell ---------- */
+  .wrap{
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 20px 20px 64px;
+  }
+
+  header.top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding: 6px 4px 22px;
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .brand .mark{
+    width:46px;height:46px;
+    border-radius: 13px;
+    background: linear-gradient(155deg, var(--sun), var(--coral));
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px;
+    box-shadow: 0 6px 14px rgba(255,111,89,0.35);
+    transform: rotate(-6deg);
+    flex-shrink:0;
+  }
+  .brand h1{
+    font-size: 1.5rem;
+    color: var(--chalkboard);
+    line-height:1.05;
+  }
+  .brand p{
+    margin: 2px 0 0;
+    font-size: 0.82rem;
+    color: #6b7a6e;
+    font-weight:600;
+  }
+
+  .stat-pills{
+    display:flex;
+    gap:8px;
+    flex-wrap: wrap;
+    justify-content:flex-end;
+  }
+  .pill{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background: #fff;
+    border: 2px solid #EDE6D6;
+    padding: 7px 13px;
+    border-radius: 999px;
+    font-weight:700;
+    font-size: 0.92rem;
+    color: var(--chalkboard);
+    box-shadow: 0 2px 0 #EDE6D6;
+  }
+  .pill .n{ min-width: 1.4em; text-align:left; }
+  .pill.streak{ color: var(--coral-dark); }
+  .pill.streak.hot{ animation: pulse 0.6s ease; }
+  @keyframes pulse{
+    0%{ transform:scale(1); }
+    40%{ transform:scale(1.18); }
+    100%{ transform:scale(1); }
+  }
+
+  /* ---------- hero / video ---------- */
+  .hero-card{
+    background: linear-gradient(180deg, var(--wood), var(--wood-dark));
+    border-radius: 26px;
+    padding: 16px 16px 20px;
+    box-shadow: var(--shadow-chalk);
+    position:relative;
+  }
+  .hero-card::before{
+    content:"";
+    position:absolute; inset:6px;
+    border-radius: 20px;
+    border: 2px dashed rgba(255,255,255,0.18);
+    pointer-events:none;
+  }
+  .board{
+    background: radial-gradient(120% 140% at 20% 0%, var(--chalkboard-light) 0%, var(--chalkboard) 55%, var(--chalkboard-dark) 100%);
+    border-radius: 16px;
+    padding: 14px;
+    position:relative;
+  }
+  .board video{
+    width:100%;
+    display:block;
+    border-radius: 10px;
+    background:#000;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+  }
+  .board-caption{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 0 2px;
+    flex-wrap:wrap;
+  }
+  .board-caption p{
+    margin:0;
+    color: var(--chalk);
+    font-weight:600;
+    font-size:0.92rem;
+    opacity:0.9;
+  }
+  .chalk-underline{
+    text-decoration: underline;
+    text-decoration-style: wavy;
+    text-decoration-color: var(--sun);
+    text-underline-offset: 3px;
+  }
+
+  .replay-btn{
+    border:none;
+    background: rgba(255,255,255,0.12);
+    color: var(--chalk);
+    font-family:'Quicksand',sans-serif;
+    font-weight:700;
+    font-size:0.85rem;
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor:pointer;
+    display:flex; align-items:center; gap:6px;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  .replay-btn:hover{ background: rgba(255,255,255,0.22); }
+  .replay-btn:active{ transform: scale(0.96); }
+
+  /* ---------- section headers ---------- */
+  .section-head{
+    margin: 34px 0 14px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .section-head h2{
+    font-size: 1.28rem;
+    color: var(--chalkboard);
+  }
+  .section-head .hint{
+    font-size:0.85rem;
+    color:#7c8a7e;
+    font-weight:600;
+  }
+
+  /* ---------- letter grid ---------- */
+  .letter-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+    gap: 8px;
+  }
+  .tile{
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radius-tile);
+    border: none;
+    cursor:pointer;
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size: 1.35rem;
+    color: var(--chalkboard);
+    background: #fff;
+    border: 2px solid #EDE6D6;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+  }
+  .tile:hover{ transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.08); }
+  .tile:active{ transform: translateY(0); }
+  .tile.active{
+    background: var(--chalkboard);
+    color: var(--chalk);
+    border-color: var(--chalkboard);
+    box-shadow: 0 6px 14px rgba(30,58,43,0.35);
+  }
+  .tile.mastered:not(.active)::after{
+    content:"";
+    position:absolute;
+    top:5px; right:5px;
+    width:8px; height:8px;
+    border-radius:50%;
+    background: var(--sky);
+    box-shadow: 0 0 0 2px #fff;
+  }
+  .tile.mastered.active::after{
+    content:"";
+    position:absolute;
+    top:5px; right:5px;
+    width:8px; height:8px;
+    border-radius:50%;
+    background: var(--sun);
+    box-shadow: 0 0 0 2px var(--chalkboard);
+  }
+
+  /* ---------- practice card ---------- */
+  .practice-card{
+    margin-top: 30px;
+    background:#fff;
+    border-radius: 24px;
+    padding: 30px 24px 26px;
+    text-align:center;
+    border: 2px solid #EDE6D6;
+    position:relative;
+    overflow:hidden;
+  }
+  .practice-card .big-letter{
+    font-family:'Baloo 2',sans-serif;
+    font-size: 5.2rem;
+    line-height:1;
+    color: var(--chalkboard);
+    font-weight:800;
+  }
+  .practice-card .prompt{
+    margin: 6px 0 22px;
+    color:#6b7a6e;
+    font-weight:600;
+    font-size:0.98rem;
+  }
+
+  .mic-btn{
+    width: 92px; height:92px;
+    border-radius:50%;
+    border:none;
+    background: radial-gradient(circle at 32% 28%, #6fe0d6, var(--sky-dark));
+    color:#fff;
+    font-size: 2.1rem;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    margin: 0 auto;
+    box-shadow: 0 10px 22px rgba(49,167,158,0.4);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    position:relative;
+  }
+  .mic-btn:hover{ transform: translateY(-2px); }
+  .mic-btn:active{ transform: translateY(0) scale(0.97); }
+  .mic-btn[disabled]{ opacity:0.55; cursor:not-allowed; }
+  .mic-btn.listening{
+    background: radial-gradient(circle at 32% 28%, #ff9c8d, var(--coral-dark));
+    box-shadow: 0 10px 22px rgba(227,84,63,0.45);
+    animation: mic-pulse 1.1s ease-in-out infinite;
+  }
+  @keyframes mic-pulse{
+    0%{ box-shadow: 0 0 0 0 rgba(255,111,89,0.45), 0 10px 22px rgba(227,84,63,0.45); }
+    70%{ box-shadow: 0 0 0 18px rgba(255,111,89,0), 0 10px 22px rgba(227,84,63,0.45); }
+    100%{ box-shadow: 0 0 0 0 rgba(255,111,89,0), 0 10px 22px rgba(227,84,63,0.45); }
+  }
+  .mic-label{
+    margin-top:12px;
+    font-weight:700;
+    font-size:0.85rem;
+    color:#6b7a6e;
+    min-height: 1.3em;
+  }
+
+  .feedback{
+    margin-top: 20px;
+    min-height: 64px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+  }
+  .feedback .verdict{
+    font-family:'Baloo 2',sans-serif;
+    font-size: 1.35rem;
+    font-weight:700;
+    display:flex; align-items:center; gap:8px;
+  }
+  .feedback .verdict.correct{ color: var(--sky-dark); }
+  .feedback .verdict.incorrect{ color: var(--coral-dark); }
+  .feedback .detail{
+    font-size:0.88rem;
+    color:#7c8a7e;
+    font-weight:600;
+  }
+  .heard{
+    font-size:0.82rem;
+    color:#a3ada4;
+    font-weight:600;
+  }
+  .heard b{ color:#6b7a6e; }
+
+  .float-points{
+    position:absolute;
+    left:50%; top:36%;
+    transform: translate(-50%,0);
+    font-family:'Baloo 2',sans-serif;
+    font-weight:800;
+    font-size:1.6rem;
+    color: var(--sun-dark);
+    opacity:0;
+    pointer-events:none;
+  }
+  .float-points.go{
+    animation: floatUp 1.1s ease-out forwards;
+  }
+  @keyframes floatUp{
+    0%{ opacity:0; transform: translate(-50%,10px) scale(0.7); }
+    18%{ opacity:1; transform: translate(-50%,-6px) scale(1.08); }
+    100%{ opacity:0; transform: translate(-50%,-70px) scale(1); }
+  }
+
+  .nav-row{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin-top: 22px;
+  }
+  .nav-btn{
+    border: 2px solid #EDE6D6;
+    background:#fff;
+    color: var(--chalkboard);
+    font-family:'Quicksand',sans-serif;
+    font-weight:700;
+    padding: 9px 18px;
+    border-radius: 999px;
+    cursor:pointer;
+    font-size:0.9rem;
+    transition: transform 0.1s ease, background 0.1s ease;
+  }
+  .nav-btn:hover{ background:#F8F5EC; }
+  .nav-btn:active{ transform: scale(0.96); }
+
+  .unsupported-note{
+    margin-top:16px;
+    background: #FFF3E9;
+    border: 2px solid #FBD9BE;
+    color: #9C5A2E;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight:600;
+    text-align:left;
+  }
+
+  /* ---------- progress / badges ---------- */
+  .progress-card{
+    margin-top: 30px;
+    background: #fff;
+    border: 2px solid #EDE6D6;
+    border-radius: 20px;
+    padding: 20px 22px;
+  }
+  .progress-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+    flex-wrap:wrap;
+    margin-bottom:12px;
+  }
+  .progress-top h3{ font-size:1.05rem; color:var(--chalkboard); }
+  .progress-top span{ font-weight:700; color:#7c8a7e; font-size:0.85rem; }
+  .bar-track{
+    height: 12px;
+    border-radius: 999px;
+    background: #F1ECDE;
+    overflow:hidden;
+  }
+  .bar-fill{
+    height:100%;
+    border-radius:999px;
+    background: linear-gradient(90deg, var(--sun), var(--coral));
+    width:0%;
+    transition: width 0.5s ease;
+  }
+
+  .badges{
+    display:flex;
+    gap: 14px;
+    margin-top: 20px;
+    flex-wrap:wrap;
+  }
+  .badge{
+    flex:1 1 140px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: #FAF7EF;
+    border: 2px solid #EDE6D6;
+    opacity: 0.45;
+    filter: grayscale(0.6);
+    transition: opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease;
+  }
+  .badge.unlocked{
+    opacity:1;
+    filter:none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+  }
+  .badge .icon{ font-size:1.6rem; }
+  .badge .txt b{ display:block; font-size:0.85rem; color:var(--chalkboard); }
+  .badge .txt small{ font-size:0.72rem; color:#8a978c; font-weight:600; }
+
+  /* ---------- toast ---------- */
+  .toast{
+    position: fixed;
+    left:50%;
+    bottom: 26px;
+    transform: translate(-50%, 20px);
+    background: var(--chalkboard);
+    color: var(--chalk);
+    font-family:'Baloo 2',sans-serif;
+    font-weight:600;
+    padding: 12px 22px;
+    border-radius: 999px;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 40;
+    font-size:0.95rem;
+    display:flex; align-items:center; gap:8px;
+  }
+  .toast.show{
+    opacity:1;
+    transform: translate(-50%, 0);
+  }
+
+  #confetti-canvas{
+    position:fixed;
+    inset:0;
+    width:100vw; height:100vh;
+    pointer-events:none;
+    z-index: 50;
+  }
+
+  footer.foot{
+    text-align:center;
+    margin-top: 40px;
+    color:#9aa79c;
+    font-size:0.78rem;
+    font-weight:600;
+  }
+
+  @media (max-width: 520px){
+    .practice-card .big-letter{ font-size: 4rem; }
+    .brand h1{ font-size:1.25rem; }
+    .stat-pills{ justify-content:flex-start; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+<div class="toast" id="toast"></div>
+
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="mark">🔤</div>
+      <div>
+        <h1>Letter Sounds Lab</h1>
+        <p>Watch, listen, and say the sound</p>
+      </div>
+    </div>
+    <div class="stat-pills">
+      <div class="pill" id="pointsPill">⭐ <span class="n" id="pointsVal">0</span></div>
+      <div class="pill streak" id="streakPill">🔥 <span class="n" id="streakVal">0</span></div>
+    </div>
+  </header>
+
+  <div class="hero-card">
+    <div class="board">
+      <video id="phonicsVideo" playsinline controls preload="metadata">
+        <source src="assets/phonics-alphabet-sounds.mp4" type="video/mp4">
+        Your browser does not support inline video playback.
+      </video>
+      <div class="board-caption">
+        <p>Study material — <span class="chalk-underline">Aa to Zz</span> sounds</p>
+        <button class="replay-btn" id="replayBtn">↺ Watch again</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <h2>Pick a letter to practice</h2>
+    <span class="hint" id="masteredHint">0 of 26 mastered</span>
+  </div>
+
+  <div class="letter-grid" id="letterGrid"></div>
+
+  <div class="practice-card" id="practiceCard">
+    <div class="float-points" id="floatPoints">+10</div>
+    <div class="big-letter" id="bigLetter">Aa</div>
+    <p class="prompt" id="promptText">Tap the mic and say this letter's sound out loud</p>
+
+    <button class="mic-btn" id="micBtn" title="Tap to record">🎤</button>
+    <div class="mic-label" id="micLabel">Tap to record</div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" id="prevBtn">← Previous</button>
+      <button class="nav-btn" id="nextBtn">Next →</button>
+    </div>
+
+    <div class="unsupported-note" id="unsupportedNote" style="display:none;">
+      Speech recognition isn't available in this browser. Try the latest Chrome or Edge on desktop or Android to practice with your voice — you can still watch the video above.
+    </div>
+  </div>
+
+  <div class="progress-card">
+    <div class="progress-top">
+      <h3>Your progress</h3>
+      <span id="progressCount">0 / 26 letters mastered</span>
+    </div>
+    <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
+
+    <div class="badges">
+      <div class="badge" id="badgeBronze">
+        <div class="icon">🥉</div>
+        <div class="txt"><b>Warm-Up</b><small>5 correct sounds</small></div>
+      </div>
+      <div class="badge" id="badgeSilver">
+        <div class="icon">🥈</div>
+        <div class="txt"><b>Sound Scout</b><small>15 correct sounds</small></div>
+      </div>
+      <div class="badge" id="badgeGold">
+        <div class="icon">🥇</div>
+        <div class="txt"><b>Alphabet Champion</b><small>All 26 mastered</small></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="foot">Made for early readers · progress is saved on this device</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- letter data ---------------- */
+  var LETTERS = [
+    { l:"A", name:["ay","a"], sound:["a","ah","apple"] },
+    { l:"B", name:["bee","be"], sound:["b","buh"] },
+    { l:"C", name:["see","cee","sea","si"], sound:["c","k","kuh","s","suh"] },
+    { l:"D", name:["dee","de"], sound:["d","duh"] },
+    { l:"E", name:["e","ee"], sound:["e","eh"] },
+    { l:"F", name:["eff","ef","f"], sound:["f","ff","fuh"] },
+    { l:"G", name:["gee","jee"], sound:["g","guh","juh"] },
+    { l:"H", name:["aitch","h","each"], sound:["h","huh"] },
+    { l:"I", name:["eye","i","aye"], sound:["i","ih"] },
+    { l:"J", name:["jay"], sound:["j","juh"] },
+    { l:"K", name:["kay","k"], sound:["k","kuh"] },
+    { l:"L", name:["el","ell","l"], sound:["l","ll","luh"] },
+    { l:"M", name:["em","m"], sound:["m","mm","muh"] },
+    { l:"N", name:["en","n"], sound:["n","nn","nuh"] },
+    { l:"O", name:["oh","o"], sound:["o","ah"] },
+    { l:"P", name:["pee","p"], sound:["p","puh"] },
+    { l:"Q", name:["cue","queue","q"], sound:["q","kwuh","kw"] },
+    { l:"R", name:["are","ar","r"], sound:["r","er","rr"] },
+    { l:"S", name:["es","ess","s"], sound:["s","ss","suh"] },
+    { l:"T", name:["tee","t"], sound:["t","tuh"] },
+    { l:"U", name:["you","u"], sound:["u","uh"] },
+    { l:"V", name:["vee","v"], sound:["v","vv","vuh"] },
+    { l:"W", name:["double u","doubleyou","doubleu"], sound:["w","wuh"] },
+    { l:"X", name:["ex","x"], sound:["x","ks","kss"] },
+    { l:"Y", name:["why","y"], sound:["y","yuh"] },
+    { l:"Z", name:["zee","zed","z"], sound:["z","zz","zuh"] }
+  ];
+
+  var ENCOURAGE = ["Great job!","Awesome!","You got it!","Super sound!","Nice work!","Fantastic!","You're on fire!","Well done!"];
+  var TRYAGAIN = ["Almost — try again!","Close! Give it another go.","Let's try that one more time.","Not quite — you can do it!","One more try!"];
+
+  /* ---------------- state ---------------- */
+  var STORAGE_KEY = "letter-sounds-lab-progress-v1";
+  var state = { points:0, streak:0, mastered:{}, attempts:0 };
+
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        var parsed = JSON.parse(raw);
+        if(parsed && typeof parsed === "object"){
+          state.points = parsed.points || 0;
+          state.streak = parsed.streak || 0;
+          state.mastered = parsed.mastered || {};
+          state.attempts = parsed.attempts || 0;
+        }
+      }
+    }catch(e){ /* ignore, start fresh */ }
+  }
+  function saveState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){ /* storage unavailable */ }
+  }
+
+  var current = 0;
+
+  /* ---------------- dom refs ---------------- */
+  var letterGrid = document.getElementById("letterGrid");
+  var bigLetter = document.getElementById("bigLetter");
+  var promptText = document.getElementById("promptText");
+  var micBtn = document.getElementById("micBtn");
+  var micLabel = document.getElementById("micLabel");
+  var feedback = document.getElementById("feedback");
+  var pointsVal = document.getElementById("pointsVal");
+  var streakVal = document.getElementById("streakVal");
+  var streakPill = document.getElementById("streakPill");
+  var floatPoints = document.getElementById("floatPoints");
+  var prevBtn = document.getElementById("prevBtn");
+  var nextBtn = document.getElementById("nextBtn");
+  var masteredHint = document.getElementById("masteredHint");
+  var progressCount = document.getElementById("progressCount");
+  var barFill = document.getElementById("barFill");
+  var unsupportedNote = document.getElementById("unsupportedNote");
+  var toast = document.getElementById("toast");
+  var replayBtn = document.getElementById("replayBtn");
+  var video = document.getElementById("phonicsVideo");
+
+  /* ---------------- build letter tiles ---------------- */
+  LETTERS.forEach(function(item, idx){
+    var btn = document.createElement("button");
+    btn.className = "tile";
+    btn.textContent = item.l;
+    btn.setAttribute("data-idx", idx);
+    btn.addEventListener("click", function(){ selectLetter(idx); });
+    letterGrid.appendChild(btn);
+  });
+
+  function refreshTiles(){
+    var tiles = letterGrid.querySelectorAll(".tile");
+    tiles.forEach(function(t, idx){
+      t.classList.toggle("active", idx === current);
+      t.classList.toggle("mastered", !!state.mastered[LETTERS[idx].l]);
+    });
+  }
+
+  function refreshProgress(){
+    var count = Object.keys(state.mastered).length;
+    masteredHint.textContent = count + " of 26 mastered";
+    progressCount.textContent = count + " / 26 letters mastered";
+    barFill.style.width = Math.round((count/26)*100) + "%";
+    document.getElementById("badgeBronze").classList.toggle("unlocked", state.attemptsCorrect_5 || count >= 5 || state.points >= 50);
+    var bronzeOn = (state.correctTotal||0) >= 5;
+    var silverOn = (state.correctTotal||0) >= 15;
+    var goldOn = count >= 26;
+    document.getElementById("badgeBronze").classList.toggle("unlocked", bronzeOn);
+    document.getElementById("badgeSilver").classList.toggle("unlocked", silverOn);
+    document.getElementById("badgeGold").classList.toggle("unlocked", goldOn);
+  }
+
+  function refreshStats(){
+    pointsVal.textContent = state.points;
+    streakVal.textContent = state.streak;
+  }
+
+  function selectLetter(idx){
+    current = idx;
+    var item = LETTERS[idx];
+    bigLetter.textContent = item.l + item.l.toLowerCase();
+    promptText.textContent = "Tap the mic and say this letter's sound out loud";
+    feedback.innerHTML = "";
+    micLabel.textContent = recognitionSupported ? "Tap to record" : "";
+    refreshTiles();
+  }
+
+  prevBtn.addEventListener("click", function(){
+    selectLetter((current - 1 + LETTERS.length) % LETTERS.length);
+  });
+  nextBtn.addEventListener("click", function(){
+    selectLetter((current + 1) % LETTERS.length);
+  });
+
+  replayBtn.addEventListener("click", function(){
+    video.currentTime = 0;
+    video.play().catch(function(){});
+  });
+
+  /* ---------------- toast ---------------- */
+  var toastTimer = null;
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toast.classList.remove("show"); }, 2200);
+  }
+
+  /* ---------------- confetti ---------------- */
+  var canvas = document.getElementById("confetti-canvas");
+  var ctx = canvas.getContext("2d");
+  var particles = [];
+  var confettiColors = ["#FFC94D","#FF6F59","#4ECDC4","#A78BFA","#F6F1E4","#31A79E"];
+  var rafId = null;
+
+  function resizeCanvas(){
+    canvas.width = window.innerWidth * (window.devicePixelRatio || 1);
+    canvas.height = window.innerHeight * (window.devicePixelRatio || 1);
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+    ctx.setTransform(window.devicePixelRatio||1,0,0,window.devicePixelRatio||1,0,0);
+  }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  function burstConfetti(originXRatio){
+    var count = 90;
+    var originX = (originXRatio === undefined ? 0.5 : originXRatio) * window.innerWidth;
+    var originY = window.innerHeight * 0.32;
+    for(var i=0;i<count;i++){
+      var angle = (Math.random()*Math.PI*2);
+      var speed = 3 + Math.random()*7;
+      particles.push({
+        x: originX,
+        y: originY,
+        vx: Math.cos(angle)*speed*0.6 + (Math.random()-0.5)*4,
+        vy: Math.sin(angle)*speed*0.6 - Math.random()*6 - 2,
+        size: 5 + Math.random()*6,
+        color: confettiColors[Math.floor(Math.random()*confettiColors.length)],
+        rot: Math.random()*Math.PI*2,
+        vr: (Math.random()-0.5)*0.35,
+        shape: Math.random() < 0.5 ? "rect" : "circle",
+        life: 0,
+        maxLife: 70 + Math.random()*40
+      });
+    }
+    if(!rafId){ rafId = requestAnimationFrame(tick); }
+  }
+
+  function tick(){
+    ctx.clearRect(0,0,window.innerWidth, window.innerHeight);
+    var alive = false;
+    for(var i=particles.length-1;i>=0;i--){
+      var p = particles[i];
+      p.life++;
+      p.vy += 0.18;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.vr;
+      var lifeRatio = p.life / p.maxLife;
+      if(p.life > p.maxLife || p.y > window.innerHeight + 40){
+        particles.splice(i,1);
+        continue;
+      }
+      alive = true;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, 1 - lifeRatio*lifeRatio);
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      if(p.shape === "rect"){
+        ctx.fillRect(-p.size/2, -p.size/3, p.size, p.size*0.66);
+      }else{
+        ctx.beginPath();
+        ctx.arc(0,0,p.size/2,0,Math.PI*2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+    if(alive || particles.length){
+      rafId = requestAnimationFrame(tick);
+    }else{
+      rafId = null;
+    }
+  }
+
+  /* ---------------- matching logic ---------------- */
+  function normalize(str){
+    return str.toLowerCase().replace(/[^a-z ]/g,"").trim();
+  }
+
+  function levenshtein(a,b){
+    var m = a.length, n = b.length;
+    if(m===0) return n;
+    if(n===0) return m;
+    var d = [];
+    for(var i=0;i<=m;i++){ d[i]=[i]; }
+    for(var j=0;j<=n;j++){ d[0][j]=j; }
+    for(i=1;i<=m;i++){
+      for(j=1;j<=n;j++){
+        var cost = a[i-1]===b[j-1] ? 0 : 1;
+        d[i][j] = Math.min(d[i-1][j]+1, d[i][j-1]+1, d[i-1][j-1]+cost);
+      }
+    }
+    return d[m][n];
+  }
+
+  function isMatch(heardRaw, item){
+    var heard = normalize(heardRaw);
+    if(!heard) return false;
+    var tokens = heard.split(" ").filter(Boolean);
+    var accepted = item.name.concat(item.sound);
+    for(var i=0;i<accepted.length;i++){
+      var target = accepted[i];
+      if(heard === target) return true;
+      for(var t=0;t<tokens.length;t++){
+        var tok = tokens[t];
+        if(tok === target) return true;
+        if(target.length <= 3 && tok.length <= 4){
+          if(levenshtein(tok, target) <= 1) return true;
+        }
+      }
+    }
+    if(tokens.length === 1 && tokens[0].length === 1 && tokens[0] === item.l.toLowerCase()){
+      return true;
+    }
+    return false;
+  }
+
+  /* ---------------- speech recognition ---------------- */
+  var SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var recognitionSupported = !!SpeechRecognitionCtor;
+  var recognizer = null;
+  var listening = false;
+
+  if(!recognitionSupported){
+    unsupportedNote.style.display = "block";
+    micBtn.disabled = true;
+    micLabel.textContent = "";
+  }else{
+    recognizer = new SpeechRecognitionCtor();
+    recognizer.lang = "en-US";
+    recognizer.continuous = false;
+    recognizer.interimResults = false;
+    recognizer.maxAlternatives = 6;
+
+    recognizer.onstart = function(){
+      listening = true;
+      micBtn.classList.add("listening");
+      micLabel.textContent = "Listening…";
+    };
+    recognizer.onend = function(){
+      listening = false;
+      micBtn.classList.remove("listening");
+      if(micLabel.textContent === "Listening…"){
+        micLabel.textContent = "Tap to record";
+      }
+    };
+    recognizer.onerror = function(e){
+      listening = false;
+      micBtn.classList.remove("listening");
+      var msg = "Didn't catch that — try again.";
+      if(e.error === "not-allowed" || e.error === "service-not-allowed"){
+        msg = "Microphone access is blocked. Allow the mic and try again.";
+      }else if(e.error === "no-speech"){
+        msg = "I didn't hear anything — tap the mic and try again.";
+      }
+      micLabel.textContent = msg;
+    };
+    recognizer.onresult = function(e){
+      var results = e.results[0];
+      var item = LETTERS[current];
+      var matched = false;
+      var bestHeard = results[0] ? results[0].transcript : "";
+      for(var i=0;i<results.length;i++){
+        if(isMatch(results[i].transcript, item)){
+          matched = true;
+          bestHeard = results[i].transcript;
+          break;
+        }
+      }
+      handleResult(matched, bestHeard);
+    };
+  }
+
+  micBtn.addEventListener("click", function(){
+    if(!recognitionSupported || listening) return;
+    feedback.innerHTML = "";
+    try{
+      recognizer.start();
+    }catch(err){
+      micLabel.textContent = "Tap to record";
+    }
+  });
+
+  /* ---------------- handle result / rewards ---------------- */
+  function handleResult(correct, heardText){
+    var item = LETTERS[current];
+    state.attempts = (state.attempts||0) + 1;
+
+    if(correct){
+      var already = !!state.mastered[item.l];
+      if(!already){
+        state.mastered[item.l] = true;
+      }
+      state.correctTotal = (state.correctTotal||0) + 1;
+      state.streak += 1;
+      var bonus = 10 + Math.min(state.streak, 10) * 2;
+      state.points += bonus;
+
+      feedback.innerHTML =
+        '<div class="verdict correct">✅ ' + pick(ENCOURAGE) + '</div>' +
+        '<div class="detail">That\'s the sound of ' + item.l + item.l.toLowerCase() + '</div>' +
+        '<div class="heard">I heard: <b>' + escapeHtml(heardText || "") + '</b></div>';
+
+      floatPoints.textContent = "+" + bonus;
+      floatPoints.classList.remove("go");
+      void floatPoints.offsetWidth;
+      floatPoints.classList.add("go");
+
+      burstConfetti(0.5);
+      setTimeout(function(){ burstConfetti(0.25); }, 120);
+      setTimeout(function(){ burstConfetti(0.75); }, 220);
+
+      streakPill.classList.remove("hot");
+      void streakPill.offsetWidth;
+      streakPill.classList.add("hot");
+
+      if(!already){
+        var count = Object.keys(state.mastered).length;
+        if(count === 26){ showToast("🏆 Alphabet Champion — every letter mastered!"); }
+        else{ showToast(pick(ENCOURAGE) + " " + item.l + " mastered!"); }
+      }else{
+        showToast(pick(ENCOURAGE));
+      }
+
+      checkBadges();
+    }else{
+      state.streak = 0;
+      feedback.innerHTML =
+        '<div class="verdict incorrect">✖ ' + pick(TRYAGAIN) + '</div>' +
+        '<div class="detail">Listen to the video above, then try the ' + item.l + item.l.toLowerCase() + ' sound again</div>' +
+        (heardText ? '<div class="heard">I heard: <b>' + escapeHtml(heardText) + '</b></div>' : '');
+    }
+
+    refreshStats();
+    refreshTiles();
+    refreshProgress();
+    saveState();
+  }
+
+  var badgeState = { bronze:false, silver:false, gold:false };
+  function checkBadges(){
+    var count = Object.keys(state.mastered).length;
+    var correctTotal = state.correctTotal || 0;
+    if(!badgeState.bronze && correctTotal >= 5){
+      badgeState.bronze = true;
+      setTimeout(function(){ showToast("🥉 Badge unlocked: Warm-Up!"); }, 1400);
+    }
+    if(!badgeState.silver && correctTotal >= 15){
+      badgeState.silver = true;
+      setTimeout(function(){ showToast("🥈 Badge unlocked: Sound Scout!"); }, 1400);
+    }
+    if(!badgeState.gold && count >= 26){
+      badgeState.gold = true;
+    }
+  }
+
+  function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
+    });
+  }
+
+  /* ---------------- init ---------------- */
+  loadState();
+  badgeState.bronze = (state.correctTotal||0) >= 5;
+  badgeState.silver = (state.correctTotal||0) >= 15;
+  badgeState.gold = Object.keys(state.mastered).length >= 26;
+  refreshStats();
+  refreshProgress();
+  selectLetter(0);
+
+})();
+</script>
+</body>
+</html>
